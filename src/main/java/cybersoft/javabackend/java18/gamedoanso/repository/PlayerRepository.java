@@ -4,6 +4,8 @@ import cybersoft.javabackend.java18.gamedoanso.model.Player;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerRepository extends AbstractRepository<Player> {
     public Player findByUsername(String username) {
@@ -66,6 +68,27 @@ public class PlayerRepository extends AbstractRepository<Player> {
             statement.setString(3, newUser.getName());
 
             return statement.executeUpdate();
+        });
+    }
+
+    public List<Player> getAllUser() {
+        final String query = """
+                select *
+                from player
+                """;
+        return executeQuery(connection -> {
+            List<Player> listUserName = new ArrayList<>();
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                listUserName.add(new Player(
+                                resultSet.getString("username"),
+                                resultSet.getString("password"),
+                                resultSet.getString("name")
+                        )
+                );
+            }
+            return listUserName;
         });
     }
 }

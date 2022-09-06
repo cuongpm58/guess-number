@@ -61,6 +61,32 @@ public class GameSessionRepository extends AbstractRepository<GameSession> {
         });
     }
 
+    public List<GameSession> getAllGameSession() {
+        final String query = """
+                    select id,  target, start_time, end_time, is_completed, is_active, username
+                    from game_session
+                """;
+        return executeQuery(connection -> {
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            ResultSet resultSet = statement.executeQuery();
+            List<GameSession> sessions = new ArrayList<>();
+
+            while (resultSet.next()) {
+                sessions.add(new GameSession()
+                        .id(resultSet.getString("id"))
+                        .targetNumber(resultSet.getInt("target"))
+                        .startTime(getDateTimeFromResultSet("start_time", resultSet))
+                        .endTime(getDateTimeFromResultSet("end_time", resultSet))
+                        .isCompleted(resultSet.getInt("is_completed") == 1)
+                        .isActive(resultSet.getInt("is_active") == 1)
+                        .username(resultSet.getString("username")));
+            }
+
+            return sessions;
+        });
+    }
+
     public GameSession findById(String id) {
         final String query = """
                     select id,  target, start_time, end_time, is_completed, is_active, username

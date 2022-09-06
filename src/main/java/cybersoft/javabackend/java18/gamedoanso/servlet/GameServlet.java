@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "gameServlet", urlPatterns = {
         UrlUtils.GAME,
@@ -33,8 +34,7 @@ public class GameServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         switch (req.getServletPath()) {
             case UrlUtils.GAME, UrlUtils.NEW_GAME -> loadGame(req, resp);
-            case UrlUtils.XEP_HANG -> req.getRequestDispatcher(JspUtils.XEP_HANG)
-                    .forward(req, resp);
+            case UrlUtils.XEP_HANG -> processRanking(req, resp);
             default -> resp.sendRedirect(req.getContextPath() + UrlUtils.NOT_FOUND);
         }
     }
@@ -87,6 +87,16 @@ public class GameServlet extends HttpServlet {
         }
 
         resp.sendRedirect(req.getContextPath() + UrlUtils.GAME);
+    }
+
+    private void processRanking(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<GameSession> gameSessions = gameService.getRanking();
+        gameSessions.stream().forEach(gameSession -> {
+            System.out.println("gameSession: " + gameSession.getUsername() + ", " + gameSession.getId() + ", " + gameSession.getMinGuess());
+        });
+        req.setAttribute("gameSessions", gameSessions);
+        req.getRequestDispatcher(JspUtils.XEP_HANG)
+                .forward(req, resp);
     }
 
     private Guess createGuess(GameSession gameSession, int guessNumber) {

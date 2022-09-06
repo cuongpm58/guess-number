@@ -18,6 +18,8 @@ public class GameSession implements Serializable {
     private boolean isCompleted;
     private boolean isActive;
 
+    private int minGuess;
+
     public GameSession() {
 
     }
@@ -117,8 +119,16 @@ public class GameSession implements Serializable {
         return this;
     }
 
+    public int getMinGuess() {
+        return minGuess;
+    }
+
+    public void setMinGuess(int minGuess) {
+        this.minGuess = minGuess;
+    }
+
     @Override
     public String toString() {
-        return String.format("[id: %s, active: %s]", this.id, this.isActive);
+        return String.format("[id: %s, active: %s, username: %s, minGuess: %s]", this.id, this.isActive, this.username, this.minGuess);
     }
 }

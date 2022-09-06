@@ -54,4 +54,26 @@ public class GuessRepository extends AbstractRepository<Guess> {
             return statement.executeUpdate();
         });
     }
+
+    public List<Guess> getTop3() {
+        final String query = """
+                select * from guess limit 3
+                orderby
+                """;
+        return executeQuery(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Guess> listGuess = new LinkedList<>();
+            while (resultSet.next()) {
+                Guess newGuess = new Guess(
+                        resultSet.getInt("value"),
+                        resultSet.getString("session_id"),
+                        resultSet.getDate("moment").toLocalDate().atStartOfDay(),
+                        resultSet.getInt("result")
+                );
+                listGuess.add(newGuess);
+            }
+            return listGuess;
+        });
+    }
 }

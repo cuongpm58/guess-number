@@ -8,6 +8,7 @@ import cybersoft.javabackend.java18.gamedoanso.repository.GuessRepository;
 import cybersoft.javabackend.java18.gamedoanso.repository.PlayerRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 public class GameService {
     private static GameService INSTANCE = null;
@@ -110,5 +111,33 @@ public class GameService {
 
     public void completeGame(String sessionId) {
         gameSessionRepository.completeGame(sessionId);
+    }
+
+    public List<GameSession> getRanking() {
+        List<Player> listPlayer = playerRepository.getAllUser();
+        // get best game for each user
+//        List<GameSession>listPlayer.stream().
+        List<GameSession> bestGames = listPlayer.stream().map(player -> {
+                    List<GameSession> gameSessions = gameSessionRepository.findByUsername(player.getUsername());
+                    int[] minGuess = {Integer.MAX_VALUE};
+                    GameSession[] bestGameSession = {null};
+                    if (!gameSessions.isEmpty()) {
+                        gameSessions.stream().forEach(gameSession -> {
+                            List<Guess> guessList = guessRepository.findBySession(gameSession.getId());
+                            if (!guessList.isEmpty() && guessList.size() < minGuess[0]) {
+                                minGuess[0] = guessList.size();
+                                bestGameSession[0] = gameSession;
+                                bestGameSession[0].setMinGuess(minGuess[0]);
+                            }
+                        });
+                    }
+                    return bestGameSession[0];
+                })
+                .filter(gameSession -> Objects.nonNull(gameSession))
+                .sorted((g1, g2) -> g2.getMinGuess() - g1.getMinGuess())
+                .toList();
+        bestGames.forEach(gameSession -> System.out.println(gameSession));
+
+        return bestGames;
     }
 }
